@@ -67,6 +67,15 @@
 
                                 <div class="col-md-6">
                                     <div class="form-floating">
+                                        <input type="text" name="nom_utilisateur" id="nom_utilisateur" class="form-control @error('nom_utilisateur') is-invalid @enderror"
+                                               value="{{ old('nom_utilisateur') }}" placeholder="Nom de l'utilisateur" required>
+                                        <label for="nom_utilisateur"><i class="fas fa-user me-2"></i>Nom utilisateur *</label>
+                                        @error('nom_utilisateur')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-floating">
                                         <input type="date" name="date_affectation" id="date_affectation" class="form-control @error('date_affectation') is-invalid @enderror"
                                                value="{{ old('date_affectation', date('Y-m-d')) }}" required>
                                         <label for="date_affectation"><i class="fas fa-calendar-alt me-2"></i>Date d'affectation *</label>

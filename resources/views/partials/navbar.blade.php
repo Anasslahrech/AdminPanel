@@ -115,11 +115,23 @@
                     </ul>
                 </li>
 
+                <!-- Utilisateurs -->
+                <li class="nav-item">
+                    <a class="nav-link modern-nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                        <i class="bi bi-people-fill nav-icon"></i>
+                        <span>Utilisateurs</span>
+                        <div class="nav-indicator"></div>
+                    </a>
+                </li>
+
                 <!-- Séparateur -->
                 <li class="nav-item nav-divider"></li>
 
-                <!-- Profil dropdown -->
-                <li class="nav-item dropdown">
+
+
+
+
+                 <li class="nav-item dropdown">
                     <a class="nav-link modern-nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="bi bi-person-circle nav-icon"></i>
                         <span>{{ Auth::user()->name ?? 'Utilisateur' }}</span>
@@ -139,6 +151,43 @@
                         </li>
                     </ul>
                 </li>
+
+                <!-- Notifications -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link modern-nav-link dropdown-toggle position-relative" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false" id="notifDropdown">
+                        <i class="bi bi-bell-fill nav-icon"></i>
+                        <span>
+
+                            @if(isset($materielsFaibleStock) && $materielsFaibleStock->count() > 0)
+                                <span class="notification-count text-danger fw-bold">({{ $materielsFaibleStock->count() }})</span>
+                            @endif
+                        </span>
+                        @if(isset($materielsFaibleStock) && $materielsFaibleStock->count() > 0)
+                            <span class="badge bg-danger position-absolute top-0 start-100 translate-middle badge rounded-pill">
+                                {{ $materielsFaibleStock->count() }}
+                            </span>
+                        @endif
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end modern-dropdown" aria-labelledby="notifDropdown" style="min-width: 300px;">
+                        <li class="dropdown-header">Matériels en stock faible</li>
+                        @if(isset($materielsFaibleStock) && $materielsFaibleStock->count() > 0)
+                            @foreach($materielsFaibleStock as $materiel)
+                                <li>
+                                    <a class="dropdown-item d-flex justify-content-between align-items-center" href="{{ route('materiels.index') }}">
+                                        <span>{{ $materiel->nom }} (Réf: {{ $materiel->reference }})</span>
+                                        <span class="badge bg-danger rounded-pill">{{ $materiel->quantite }}</span>
+                                    </a>
+                                </li>
+                            @endforeach
+                        @else
+                            <li><span class="dropdown-item-text text-muted">Aucun matériel en stock faible.</span></li>
+                        @endif
+                    </ul>
+                </li>
+
+                <!-- Profil -->
+
             </ul>
         </div>
     </div>
@@ -226,7 +275,6 @@
                                     <i class="bi bi-hdd-network-fill"></i>
                                 </div>
                                 <div class="stat-content">
-
                                     <p class="stat-label">Matériels</p>
                                     <a href="{{ route('materiels.index') }}" class="stat-link">Voir tous <i class="bi bi-arrow-right"></i></a>
                                 </div>
@@ -238,7 +286,6 @@
                                     <i class="bi bi-building"></i>
                                 </div>
                                 <div class="stat-content">
-
                                     <p class="stat-label">Sociétés</p>
                                     <a href="{{ route('societes.index') }}" class="stat-link">Voir toutes <i class="bi bi-arrow-right"></i></a>
                                 </div>
@@ -250,7 +297,6 @@
                                     <i class="bi bi-person-badge-fill"></i>
                                 </div>
                                 <div class="stat-content">
-
                                     <p class="stat-label">Affectations</p>
                                     <a href="{{ route('affectations.index') }}" class="stat-link">Voir toutes <i class="bi bi-arrow-right"></i></a>
                                 </div>
@@ -262,7 +308,6 @@
                                     <i class="bi bi-file-earmark-text-fill"></i>
                                 </div>
                                 <div class="stat-content">
-
                                     <p class="stat-label">Contrats</p>
                                     <a href="{{ route('contrats.index') }}" class="stat-link">Voir tous <i class="bi bi-arrow-right"></i></a>
                                 </div>
@@ -714,6 +759,21 @@ body {
     gap: 0.75rem;
 }
 
+/* Styles pour le compteur de notifications dans le texte */
+.notification-count {
+    font-size: 0.85em;
+    color: #f8fafc;
+    background: rgba(239, 68, 68, 0.2);
+    padding: 0.15em 0.4em;
+    border-radius: 50px;
+    margin-left: 0.25rem;
+    transition: all 0.3s ease;
+}
+
+.modern-nav-link:hover .notification-count {
+    background: rgba(239, 68, 68, 0.3);
+}
+
 /* Animations */
 @keyframes fadeInUp {
     from {
@@ -987,7 +1047,10 @@ document.addEventListener('DOMContentLoaded', function() {
 // Fonction utilitaire pour mettre à jour les notifications
 function updateNotificationBadge(element, count) {
     const badge = element.querySelector('.notification-badge');
+    const countText = element.querySelector('.notification-count');
+
     if (count > 0) {
+        // Mise à jour du badge
         if (!badge) {
             const newBadge = document.createElement('span');
             newBadge.className = 'notification-badge';
@@ -997,13 +1060,23 @@ function updateNotificationBadge(element, count) {
         } else {
             badge.textContent = count > 99 ? '99+' : count;
         }
-    } else if (badge) {
-        badge.remove();
+
+        // Mise à jour du compteur dans le texte
+        if (!countText) {
+            const span = element.querySelector('span');
+            const newCountText = document.createElement('span');
+            newCountText.className = 'notification-count';
+            newCountText.textContent = `(${count > 99 ? '99+' : count})`;
+            span.appendChild(newCountText);
+        } else {
+            countText.textContent = `(${count > 99 ? '99+' : count})`;
+        }
+    } else {
+        // Suppression des indicateurs si pas de notifications
+        if (badge) badge.remove();
+        if (countText) countText.remove();
     }
 }
-
-// Exemple d'utilisation des notifications (à appeler depuis votre code Laravel/JS)
-// updateNotificationBadge(document.querySelector('[href*="materiels"]'), 5);
 </script>
 
 </body>

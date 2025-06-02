@@ -2,13 +2,51 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    @if(session('alert'))
-    <script>
-        alert("{{ session('alert') }}");
-    </script>
-@endif
 
-    <!-- En-tête avec dégradé -->
+    {{-- Centralized Alert Display --}}
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-success bg-opacity-10 p-2 me-3">
+                    <i class="bi bi-check-circle-fill text-success"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <strong>Succès !</strong> {{ session('success') }}
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+            </div>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-danger bg-opacity-10 p-2 me-3">
+                    <i class="bi bi-x-circle-fill text-danger"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <strong>Erreur !</strong> {{ session('error') }}
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+            </div>
+        </div>
+    @endif
+
+    {{-- Moved the "alert" session handling here, if you still want it for general alerts --}}
+    @if(session('alert') && !session('success') && !session('error'))
+        <div class="alert alert-info alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <div class="rounded-circle bg-info bg-opacity-10 p-2 me-3">
+                    <i class="bi bi-info-circle-fill text-info"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <strong>Information :</strong> {{ session('alert') }}
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
+            </div>
+        </div>
+    @endif
+
     <div class="row mb-4">
         <div class="col-12">
             <div class="card border-0 shadow-lg bg-gradient-primary text-white">
@@ -34,7 +72,6 @@
         </div>
     </div>
 
-    <!-- Statistiques rapides -->
     <div class="row mb-4">
         <div class="col-md-3 mb-3">
             <div class="card border-0 shadow-sm h-100 hover-lift">
@@ -82,22 +119,7 @@
         </div>
     </div>
 
-    <!-- Messages d'alerte -->
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4" role="alert">
-            <div class="d-flex align-items-center">
-                <div class="rounded-circle bg-success bg-opacity-10 p-2 me-3">
-                    <i class="bi bi-check-circle-fill text-success"></i>
-                </div>
-                <div class="flex-grow-1">
-                    <strong>Succès !</strong> {{ session('success') }}
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fermer"></button>
-            </div>
-        </div>
-    @endif
 
-    <!-- Tableau principal -->
     <div class="card border-0 shadow-lg">
         <div class="card-header bg-white border-0 py-3">
             <div class="d-flex justify-content-between align-items-center">
@@ -113,11 +135,15 @@
                                placeholder="Rechercher..." id="searchInput">
                     </div>
                     <a href="{{ route('materiels.export') }}" class="btn btn-outline-success">
-    <i class="bi bi-file-earmark-excel me-1"></i>Télécharger Excel
-</a>
-<a href="{{ route('materiels.export', ['format' => 'csv']) }}" class="btn btn-outline-primary ms-2">
-    <i class="bi bi-file-earmark-text me-1"></i>Télécharger CSV
-</a>
+                        <i class="bi bi-file-earmark-excel me-1"></i>Télécharger Excel
+                    </a>
+                    <a href="{{ route('materiels.export', ['format' => 'csv']) }}" class="btn btn-outline-primary ms-2">
+                        <i class="bi bi-file-earmark-text me-1"></i>Télécharger CSV
+                    </a>
+                    {{-- New Import Button --}}
+                    <button type="button" class="btn btn-outline-info ms-2" data-bs-toggle="modal" data-bs-target="#importExcelModal">
+                        <i class="bi bi-file-earmark-arrow-up me-1"></i>Importer Excel
+                    </button>
                 </div>
             </div>
         </div>
@@ -275,17 +301,13 @@
                                 <td>
                                     <div class="d-flex justify-content-center gap-1">
                                         <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm btn-outline-primary"
-                                                    title="Voir détails" data-bs-toggle="modal"
-                                                    data-bs-target="#detailModal{{ $materiel->id }}">
-                                                <i class="bi bi-eye"></i>
-                                            </button>
+
                                             <a href="{{ route('materiels.edit', $materiel) }}"
                                                class="btn btn-sm btn-outline-warning" title="Modifier">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
                                             <button type="button" class="btn btn-sm btn-outline-danger"
-                                                    title="Supprimer" onclick="confirmDelete({{ $materiel->id }})">
+                                                            title="Supprimer" onclick="confirmDelete({{ $materiel->id }})">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </div>
@@ -297,7 +319,6 @@
                 </table>
             </div>
 
-            <!-- Pagination et informations -->
             <div class="card-footer bg-light border-0">
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="text-muted">
@@ -314,7 +335,6 @@
     </div>
 </div>
 
-<!-- Modal de confirmation de suppression -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
@@ -345,7 +365,40 @@
     </div>
 </div>
 
+<div class="modal fade" id="importExcelModal" tabindex="-1" aria-labelledby="importExcelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0 bg-info text-white">
+                <h5 class="modal-title" id="importExcelModalLabel">
+                    <i class="bi bi-file-earmark-arrow-up me-2"></i>Importer des Matériels (Excel)
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('materiels.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body py-4">
+                    <p class="text-muted mb-4">Veuillez sélectionner un fichier Excel (.xlsx ou .xls) à importer.</p>
+                    <div class="input-group mb-3">
+                        <input type="file" class="form-control @error('file') is-invalid @enderror" id="excelFile" name="file" accept=".xlsx, .xls" required>
+                        <label class="input-group-text" for="excelFile">Parcourir</label>
+                    </div>
+                    @error('file')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-info">
+                        <i class="bi bi-upload me-1"></i>Importer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <style>
+/* Your existing CSS styles */
 .bg-gradient-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
@@ -460,12 +513,6 @@ function confirmDelete(id) {
     modal.show();
 }
 
-// Fonction d'export (exemple)
-function exportTable() {
-    // Implémentation de l'export en CSV/Excel
-    alert('Fonctionnalité d\'export à implémenter');
-}
-
 // Animation au chargement
 document.addEventListener('DOMContentLoaded', function() {
     const cards = document.querySelectorAll('.card');
@@ -479,6 +526,14 @@ document.addEventListener('DOMContentLoaded', function() {
             card.style.transform = 'translateY(0)';
         }, index * 100);
     });
+
+    // --- Added for Import Modal ---
+    // Show the import modal automatically if there are validation errors related to the file upload
+    @if($errors->has('file'))
+        const importModal = new bootstrap.Modal(document.getElementById('importExcelModal'));
+        importModal.show();
+    @endif
+    // --- End Added for Import Modal ---
 });
 </script>
 @endsection

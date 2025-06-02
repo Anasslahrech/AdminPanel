@@ -88,16 +88,24 @@
                     <i class="bi bi-table me-2"></i>Liste des Contrats
                 </h5>
                 <div class="d-flex gap-2">
-                    <div class="input-group" style="width: 300px;">
-                        <span class="input-group-text bg-light border-end-0">
-                            <i class="bi bi-search text-muted"></i>
-                        </span>
-                        <input type="text" class="form-control border-start-0 bg-light"
-                               placeholder="Rechercher..." id="searchInput">
-                    </div>
-                    <button class="btn btn-outline-secondary" onclick="exportTable()">
-                        <i class="bi bi-download me-1"></i>Export
-                    </button>
+
+                    <div class="d-flex gap-2">
+    <div class="input-group" style="width: 300px;">
+        <span class="input-group-text bg-light border-end-0">
+            <i class="bi bi-search text-muted"></i>
+        </span>
+        <input type="text" class="form-control border-start-0 bg-light"
+               placeholder="Rechercher..." id="searchInput">
+    </div>
+   <a href="{{ route('contrats.export', ['format' => 'xlsx']) }}" class="btn btn-outline-success">
+    Télécharger Excel
+</a>
+
+<a href="{{ route('contrats.export', ['format' => 'csv']) }}" class="btn btn-outline-primary ms-2">
+    Télécharger CSV
+</a>
+
+</div>
                 </div>
             </div>
         </div>

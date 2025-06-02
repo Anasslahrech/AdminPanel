@@ -66,4 +66,7 @@
 
 <!-- Bootstrap Icons -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css">
+
+<!-- Espace ajouté -->
+<div class="my-5"></div>
 @endsection

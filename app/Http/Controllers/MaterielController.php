@@ -6,6 +6,8 @@ use App\Models\Materiel;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\MaterielsExport;
+use App\Imports\MaterielsImport;
+use Maatwebsite\Excel\Validators\ValidationException; // <--- ADD THIS LINE
 
 class MaterielController extends Controller
 {
@@ -13,21 +15,10 @@ class MaterielController extends Controller
      * Affiche la liste des matériels
      */
     public function index()
-{
-    // Pagination à 15 matériels par page (à adapter)
-    $materiels = Materiel::paginate(15);
-
-    // On vérifie la quantité sur TOUTE la table, pas juste la page en cours
-    $lowStock = Materiel::where('quantite', '<', 5)->exists();
-
-    if ($lowStock) {
-        session()->flash('alert', 'Attention, certains matériels ont une quantité inférieure à 5 !');
+    {
+        $materiels = Materiel::all();
+        return view('materiels.index', compact('materiels'));
     }
-
-    return view('materiels.index', compact('materiels'));
-}
-
-
 
     /**
      * Affiche le formulaire de création
@@ -145,5 +136,50 @@ class MaterielController extends Controller
         $filename = 'materiels-' . now()->format('Y-m-d') . '.' . $format;
 
         return Excel::download(new MaterielsExport(), $filename);
+    }
+
+    /**
+     * Importe les matériels depuis un fichier Excel
+     */
+    public function import(Request $request)
+    {
+        // Validate the uploaded file
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls|max:2048', // Max 2MB file size
+        ], [
+            'file.required' => 'Veuillez sélectionner un fichier à importer.',
+            'file.mimes' => 'Le fichier doit être de type Excel (.xlsx ou .xls).',
+            'file.max' => 'Le fichier ne doit pas dépasser 2 Mo.',
+        ]);
+
+        try {
+            // Use the Excel facade to import data with your MaterielsImport class
+            Excel::import(new MaterielsImport, $request->file('file'));
+
+            return redirect()->route('materiels.index')
+                             ->with('success', 'Les matériels ont été importés avec succès !');
+
+        } catch (ValidationException $e) { // <--- Catch Laravel-Excel's ValidationException
+            $failures = $e->failures();
+            $errors = [];
+            foreach ($failures as $failure) {
+                // Get the row number, attribute (column name), and all error messages for that cell
+                $errors[] = 'Ligne ' . $failure->row() . ' (' . $failure->attribute() . '): ' . implode(', ', $failure->errors());
+            }
+
+            // Redirect back with all validation errors
+            return redirect()->back()->withErrors($errors)->withInput();
+
+        } catch (\Exception $e) {
+            // Catch any other general import errors (e.g., file not found, server issues)
+            return redirect()->route('materiels.index')
+                             ->with('error', 'Erreur lors de l\'importation : ' . $e->getMessage());
+        }
+    }
+
+    public function lowStock()
+    {
+        $materiels = Materiel::where('quantite', '<', 5)->get();
+        return view('materiels.notifications', compact('materiels'));
     }
 }

@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('materiel_id');
             $table->unsignedBigInteger('societe_id');
+            $table->string('nom_utilisateur'); // Nouveau champ pour le nom de l'utilisateur
             $table->date('date_affectation');
-            $table->string('statut')->default('active');  // Ajout de la colonne statut
+            $table->string('statut')->default('active'); // Colonne statut
             $table->timestamps();
 
             $table->foreign('materiel_id')->references('id')->on('materiels')->onDelete('cascade');

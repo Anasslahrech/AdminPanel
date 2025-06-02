@@ -30,7 +30,7 @@
 
     <!-- Statistiques rapides -->
     <div class="row mb-4">
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="card border-0 shadow-sm h-100 hover-lift">
                 <div class="card-body text-center">
                     <div class="rounded-circle bg-info bg-opacity-10 p-3 mx-auto mb-3" style="width: 60px; height: 60px;">
@@ -41,7 +41,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="card border-0 shadow-sm h-100 hover-lift">
                 <div class="card-body text-center">
                     <div class="rounded-circle bg-primary bg-opacity-10 p-3 mx-auto mb-3" style="width: 60px; height: 60px;">
@@ -52,7 +52,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4 mb-3">
+        <div class="col-md-3 mb-3">
             <div class="card border-0 shadow-sm h-100 hover-lift">
                 <div class="card-body text-center">
                     <div class="rounded-circle bg-success bg-opacity-10 p-3 mx-auto mb-3" style="width: 60px; height: 60px;">
@@ -60,6 +60,17 @@
                     </div>
                     <h3 class="fw-bold text-success">{{ $affectations->groupBy('societe_id')->count() }}</h3>
                     <p class="text-muted mb-0">Sociétés bénéficiaires</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card border-0 shadow-sm h-100 hover-lift">
+                <div class="card-body text-center">
+                    <div class="rounded-circle bg-warning bg-opacity-10 p-3 mx-auto mb-3" style="width: 60px; height: 60px;">
+                        <i class="bi bi-person-check text-warning fs-4"></i>
+                    </div>
+                    <h3 class="fw-bold text-warning">{{ $affectations->pluck('nom_utilisateur')->unique()->count() }}</h3>
+                    <p class="text-muted mb-0">Utilisateurs</p>
                 </div>
             </div>
         </div>
@@ -126,6 +137,7 @@
                             </th>
                             <th class="border-0">Matériel</th>
                             <th class="border-0">Société</th>
+                            <th class="border-0">Utilisateur</th>
                             <th class="border-0">Date d'affectation</th>
                             <th class="border-0">Dernière modification</th>
                             <th class="border-0 text-center">Actions</th>
@@ -163,16 +175,30 @@
                                     </div>
                                 </td>
                                 <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-warning bg-opacity-10 p-2 me-3">
+                                            <i class="bi bi-person text-warning"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-semibold text-dark">{{ $affectation->nom_utilisateur }}</div>
+                                            <small class="text-muted">Utilisateur final</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
                                     <span class="badge bg-info bg-opacity-10 text-info">
                                         {{ $affectation->date_affectation->format('d/m/Y') }}
                                     </span>
                                 </td>
                                 <td>
-                                    {{ $affectation->updated_at->format('d/m/Y H:i') }}
+                                    <small class="text-muted">
+                                        {{ $affectation->updated_at->format('d/m/Y H:i') }}
+                                    </small>
                                 </td>
                                 <td>
                                     <div class="d-flex justify-content-center gap-1">
                                         <div class="btn-group" role="group">
+
                                             <a href="{{ route('affectations.edit', $affectation->id) }}"
                                                class="btn btn-sm btn-outline-warning" title="Modifier">
                                                 <i class="bi bi-pencil"></i>

@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: gestion_systeme
+    env: php
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "php artisan serve --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        generateValue: true

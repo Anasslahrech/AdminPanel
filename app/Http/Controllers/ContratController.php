@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Contrat;
 use App\Models\Societe;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ContratsExport;
 
 class ContratController extends Controller
 {
@@ -31,6 +33,12 @@ class ContratController extends Controller
         Contrat::create($request->all());
 
         return redirect()->route('contrats.index')->with('success', 'Contrat ajouté.');
+    }
+
+    public function show($id)
+    {
+        $contrat = Contrat::with('societe')->findOrFail($id);
+        return view('contrats.show', compact('contrat'));
     }
 
     public function edit($id)
@@ -61,5 +69,19 @@ class ContratController extends Controller
         $contrat->delete();
 
         return redirect()->route('contrats.index')->with('success', 'Contrat supprimé.');
+    }
+
+    // Export des contrats
+    public function export($format = 'xlsx')
+    {
+        $formatsAutorises = ['xlsx', 'csv'];
+
+        if (!in_array($format, $formatsAutorises)) {
+            abort(404, "Format d'export non supporté.");
+        }
+
+        $fileName = 'contrats.' . $format;
+
+        return Excel::download(new ContratsExport, $fileName);
     }
 }

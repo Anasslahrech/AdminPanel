@@ -56,10 +56,10 @@
             <div class="card border-0 shadow-sm h-100 hover-lift">
                 <div class="card-body text-center">
                     <div class="rounded-circle bg-info bg-opacity-10 p-3 mx-auto mb-3" style="width: 60px; height: 60px;">
-                        <i class="bi bi-envelope text-info fs-4"></i>
+                        <i class="bi bi-geo-alt text-info fs-4"></i>
                     </div>
-                    <h3 class="fw-bold text-info">{{ $societes->count() }}</h3>
-                    <p class="text-muted mb-0">Emails configurés</p>
+                    <h3 class="fw-bold text-info">{{ $societes->whereNotNull('ville')->count() }}</h3>
+                    <p class="text-muted mb-0">Villes couvertes</p>
                 </div>
             </div>
         </div>
@@ -67,10 +67,10 @@
             <div class="card border-0 shadow-sm h-100 hover-lift">
                 <div class="card-body text-center">
                     <div class="rounded-circle bg-warning bg-opacity-10 p-3 mx-auto mb-3" style="width: 60px; height: 60px;">
-                        <i class="bi bi-clock text-warning fs-4"></i>
+                        <i class="bi bi-pin-map text-warning fs-4"></i>
                     </div>
                     <h3 class="fw-bold text-warning">{{ $societes->where('created_at', '>=', now()->subDay())->count() }}</h3>
-                    <p class="text-muted mb-0">Aujourd'hui</p>
+                    <p class="text-muted mb-0">Sites actifs</p>
                 </div>
             </div>
         </div>
@@ -106,9 +106,6 @@
                         <input type="text" class="form-control border-start-0 bg-light"
                                placeholder="Rechercher..." id="searchInput">
                     </div>
-                    <button class="btn btn-outline-secondary" onclick="exportTable()">
-                        <i class="bi bi-download me-1"></i>Export
-                    </button>
                 </div>
             </div>
         </div>
@@ -136,7 +133,8 @@
                                 </div>
                             </th>
                             <th class="border-0">Nom</th>
-                            <th class="border-0">Adresse</th>
+                            <th class="border-0">Ville</th>
+                            <th class="border-0">Sites</th>
                             <th class="border-0">Email</th>
                             <th class="border-0">Date de création</th>
                             <th class="border-0 text-center">Actions</th>
@@ -167,7 +165,25 @@
                                 <td>
                                     <div class="d-flex align-items-center">
                                         <i class="bi bi-geo-alt text-muted me-2"></i>
-                                        <span>{{ Str::limit($societe->adresse, 50) }}</span>
+                                        <span>{{ $societe->ville ?? 'Non définie' }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="sites-display">
+                                        @if(!empty($societe->sites_names))
+                                            @foreach(array_slice($societe->sites_names, 0, 2) as $site)
+                                                <span class="badge bg-info bg-opacity-10 text-info me-1 mb-1">
+                                                    <i class="bi bi-pin-map me-1"></i>{{ $site }}
+                                                </span>
+                                            @endforeach
+                                            @if(count($societe->sites_names) > 2)
+                                                <span class="badge bg-secondary bg-opacity-10 text-secondary">
+                                                    +{{ count($societe->sites_names) - 2 }} autres
+                                                </span>
+                                            @endif
+                                        @else
+                                            <span class="text-muted small">Aucun site</span>
+                                        @endif
                                     </div>
                                 </td>
                                 <td>
@@ -187,9 +203,8 @@
                                 <td>
                                     <div class="d-flex justify-content-center gap-1">
                                         <div class="btn-group" role="group">
-                                            <button type="button" class="btn btn-sm btn-outline-primary"
-                                                    title="Voir détails" data-bs-toggle="modal"
-                                                    data-bs-target="#detailModal{{ $societe->id }}">
+                                            <button type="button" class="btn btn-sm btn-outline-info"
+                                                    title="Détails" data-bs-toggle="modal" data-bs-target="#detailModal{{ $societe->id }}">
                                                 <i class="bi bi-eye"></i>
                                             </button>
                                             <a href="{{ route('societes.edit', $societe) }}"
@@ -260,6 +275,28 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-muted fw-semibold">
+                                <i class="bi bi-pin-map me-1"></i>Ville
+                            </label>
+                            <div class="form-control-plaintext bg-light rounded p-3">{{ $societe->ville ?? 'Non définie' }}</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-muted fw-semibold">
+                                <i class="bi bi-pin-map-fill me-1"></i>Sites / Centres
+                            </label>
+                            <div class="form-control-plaintext bg-light rounded p-3">
+                                @if(!empty($societe->sites_names))
+                                    @foreach($societe->sites_names as $site)
+                                        <span class="badge bg-info bg-opacity-20 text-info me-2 mb-1 p-2">
+                                            <i class="bi bi-pin-map me-1"></i>{{ $site }}
+                                        </span>
+                                    @endforeach
+                                @else
+                                    <span class="text-muted">Aucun site sélectionné</span>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted fw-semibold">
                                 <i class="bi bi-envelope me-1"></i>Email
                             </label>
                             <div class="form-control-plaintext bg-light rounded p-3">
@@ -271,12 +308,6 @@
                                 <i class="bi bi-calendar-plus me-1"></i>Date de création
                             </label>
                             <div class="form-control-plaintext bg-light rounded p-3">{{ $societe->created_at->format('d/m/Y à H:i') }}</div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-muted fw-semibold">
-                                <i class="bi bi-pencil me-1"></i>Dernière modification
-                            </label>
-                            <div class="form-control-plaintext bg-light rounded p-3">{{ $societe->updated_at->format('d/m/Y à H:i') }}</div>
                         </div>
                     </div>
                 </div>
@@ -347,6 +378,15 @@
     background-color: rgba(0, 123, 255, 0.05);
     transform: scale(1.01);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sites-display {
+    max-width: 200px;
+}
+
+.sites-display .badge {
+    font-size: 0.7rem;
+    font-weight: 500;
 }
 
 .card {
@@ -446,22 +486,16 @@ function confirmDelete(id) {
     const form = document.getElementById('deleteForm');
     const companyName = document.getElementById('deleteCompanyName');
 
-    // Récupérer le nom de la société depuis le tableau
-    const row = document.querySelector(`tr[data-id="${id}"]`) ||
-                document.querySelector(`input[onclick*="${id}"]`).closest('tr');
-    const societeName = row ? row.querySelector('td:nth-child(2) .fw-semibold').textContent : '';
+    // Trouver la ligne correspondante - méthode plus robuste
+    const deleteButton = document.querySelector(`button[onclick="confirmDelete(${id})"]`);
+    const row = deleteButton.closest('tr');
+    const societeName = row.querySelector('td:nth-child(2) .fw-semibold').textContent;
 
     form.action = `/societes/${id}`;
     companyName.textContent = societeName;
 
     const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
     modal.show();
-}
-
-// Fonction d'export (exemple)
-function exportTable() {
-    // Implémentation de l'export en CSV/Excel
-    alert('Fonctionnalité d\'export à implémenter');
 }
 
 // Animation au chargement

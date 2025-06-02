@@ -4,7 +4,6 @@
 <div class="container-fluid py-4">
     <div class="row justify-content-center">
         <div class="col-lg-10 col-xl-8">
-            <!-- Header Card -->
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-gradient-primary text-white">
                     <div class="d-flex align-items-center">
@@ -17,18 +16,15 @@
                 </div>
             </div>
 
-            <!-- Main Form Card -->
             <div class="card shadow-sm border-0">
                 <div class="card-body p-4">
                     <form action="{{ route('societes.store') }}" method="POST" id="societeForm">
                         @csrf
 
-                        <!-- Progress Bar -->
                         <div class="progress mb-4">
                             <div class="progress-bar bg-primary" role="progressbar" style="width: 0%">0%</div>
                         </div>
 
-                        <!-- Section 1: Informations générales -->
                         <div class="form-section mb-5">
                             <div class="section-header mb-4">
                                 <h5 class="text-primary fw-bold mb-2">
@@ -97,10 +93,21 @@
                                         @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                     </div>
                                 </div>
+
+                                {{-- New "Sites" field (single text input) --}}
+                                <div class="col-12">
+                                    <div class="form-floating">
+                                        <input type="text" name="sites" id="sites" class="form-control @error('sites') is-invalid @enderror"
+                                               value="{{ old('sites') }}" placeholder="Nom ou identifiant du site principal">
+                                        <label for="sites"><i class="fas fa-sitemap me-2"></i>Site principal</label>
+                                        @error('sites')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                    </div>
+                                </div>
+                                {{-- End of New "Sites" field --}}
+
                             </div>
                         </div>
 
-                        <!-- Section 2: Adresse et localisation -->
                         <div class="form-section mb-5">
                             <div class="section-header mb-4">
                                 <h5 class="text-success fw-bold mb-2">
@@ -149,7 +156,6 @@
                             </div>
                         </div>
 
-                        <!-- Section 3: Informations de contact -->
                         <div class="form-section mb-5">
                             <div class="section-header mb-4">
                                 <h5 class="text-info fw-bold mb-2">
@@ -198,7 +204,6 @@
                             </div>
                         </div>
 
-                        <!-- Section 4: Contact principal -->
                         <div class="form-section mb-5">
                             <div class="section-header mb-4">
                                 <h5 class="text-warning fw-bold mb-2">
@@ -265,7 +270,6 @@
                             </div>
                         </div>
 
-                        <!-- Action Buttons -->
                         <div class="d-flex justify-content-between align-items-center pt-4 border-top">
                             <div class="text-muted small">
                                 <i class="fas fa-info-circle me-2"></i>

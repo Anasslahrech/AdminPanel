@@ -87,6 +87,18 @@
                     </div>
                 </div>
 
+                <!-- Nouveau champ : nom_utilisateur -->
+                <div class="row mb-4">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Nom d'utilisateur</label>
+                        <input type="text" name="nom_utilisateur" class="form-control form-control-lg @error('nom_utilisateur') is-invalid @enderror"
+                               value="{{ old('nom_utilisateur', $affectation->nom_utilisateur) }}" required>
+                        @error('nom_utilisateur')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
                 <div class="row mb-4">
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Date d'affectation</label>

@@ -27,6 +27,7 @@ class AffectationController extends Controller
         $request->validate([
             'materiel_id' => 'required|exists:materiels,id',
             'societe_id' => 'required|exists:societes,id',
+            'nom_utilisateur' => 'required|string|max:255',
             'date_affectation' => 'required|date',
         ]);
 
@@ -50,6 +51,7 @@ class AffectationController extends Controller
         $request->validate([
             'materiel_id' => 'required|exists:materiels,id',
             'societe_id' => 'required|exists:societes,id',
+            'nom_utilisateur' => 'required|string|max:255',
             'date_affectation' => 'required|date',
         ]);
 
@@ -64,5 +66,17 @@ class AffectationController extends Controller
         $affectation->delete();
 
         return redirect()->route('affectations.index')->with('success', 'Affectation supprimée.');
+    }
+
+    public function bulkDelete(Request $request)
+{
+    Affectation::whereIn('id', $request->ids)->delete();
+    return response()->json(['status' => 'success']);
+}
+
+public function show($id)
+    {
+        $affectation = Affectation::with(['materiel', 'societe'])->findOrFail($id);
+        return view('affectations.show', compact('affectation'));
     }
 }
